@@ -1,0 +1,7 @@
+app:
+  host: 0.0.0.0
+  port: 9000
+  detection_method: "hog"
+workers:
+    max_workers: 1
+    encodings_path: "data/encodings.pickle"
