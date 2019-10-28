@@ -51,21 +51,20 @@ main {
 }
 
 .image-block {
-    margin-top: 40px;
-    text-align: left;
-    display: flex;
+    text-align: center;
+    display: block;
+    width: 100%;
 }
 
-.image-wrapper, .predict-info {
-    width: 50%;
-}
 
 .predict-info {
     margin-left: 20px;
 }
 
-#image-preview {
-    width: 100%;
+#video, #image-preview {
+    display: block;
+    margin: 0 auto;
+/*    width: 100%; */
 }
 
 /* github link */

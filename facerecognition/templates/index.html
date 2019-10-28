@@ -13,6 +13,7 @@
         rel="stylesheet"
         href="{{ url('static', filename='styles/main.css') }}"
     >
+    <script src="{{ url('static', filename='javascript/ImageTools.js') }}"></script>
 </head>
 <body>
     <header class="header">
@@ -37,34 +38,33 @@
         </div>
     </header>
     <div class="wrapper">
-        <h1 class="subtitle">
-            RecognizeMe - dlib facerecognition demo
-        </h1>
         <main>
             <button  class="btn btn-success" onclick="HandleBrowseClick('input-image-hidden');" >Upload image</button>
             <button class="btn btn-success" id="start-capture" onclick="startCapture()">Start Video</button>
             <button class="btn btn-success" id="snap" onclick="capture()">Recognize Video</button>
             <input style="display: none;" id="input-image-hidden" onchange="handleOnChange('input-image-hidden')" type="file" accept="image/jpeg, image/png">
             <br>
+            <div class="predict-info">
+                <p>
+                    <b>Who is this ?</b>
+                    <span style="font-size: x-large; "><div class="large-text" id="data-wrapper">&nbsp;</div></span>
+                </p>
+            </div>
             <div class="image-block">
-                <div class="image-wrapper">
                     <img id="image-preview" src="https://crowdsourcer.io/assets/images/no-img.png">
-                </div>
-                <div class="video-wrapper">
-                    <video ref="video" id="video" width="480" height="640" autoplay="false"></video>
-                </div>
-                <canvas ref="canvas" id="canvas" width="480" height="640"></canvas>
-
-                <div class="predict-info">
-                    <p>
-                        <b>Who is this ?</b>
-                        <span style="font-size: x-large; "><div class="large-text" id="data-wrapper"></div></span>
-                    </p>
-
-                </div>
+                    <video ref="video" id="video" width="640" height="480" autoplay="false"></video>
+                <canvas ref="canvas" id="canvas" width="640" height="480"></canvas>
             </div>
 
             <script type="text/javascript">
+                function stopCapture(video) {
+                    let videoSrcObject = video.srcObject
+                    if( videoSrcObject !== null) {
+                        videoSrcObject.getVideoTracks().forEach(track => track.stop())
+                    }
+                    video.style.display = "none"
+                }
+
                 function responseToHtml(data) {
                   let outStr = '';
 
@@ -74,24 +74,24 @@
                           outStr += name
                       })
                   }
+                  if( outStr.length == 0) {
+                      outStr = '&nbsp;'
+                  }
                   return outStr
                 }
                 function HandleBrowseClick(input_image) {
                     video = document.getElementById('video')
-                    var videoSrcObject = video.srcObject
-                    if( videoSrcObject !== null) {
-                        videoSrcObject.getVideoTracks().forEach(track => track.stop())
-                    }
-                    video.style.display = "none"
-                    var image_preview = document.getElementById("image-preview")
+                    stopCapture(video)
+                    let image_preview = document.getElementById("image-preview")
                     image_preview.style.display = "block"
-                    var fileinput = document.getElementById(input_image);
+                    let fileinput = document.getElementById(input_image);
                     fileinput.click();
                 };
 
                 const upload = (file) => {
                   const data = new FormData();
                   const $dataWrapper = document.getElementById('data-wrapper')
+                  $dataWrapper.innerHTML = '&nbsp;'
 
                   data.append('file', file);
 
@@ -106,15 +106,23 @@
                 };
 
                 function handleOnChange(input_image) {
-                    var input = document.getElementById(input_image)
-                     document.getElementById('image-preview').src = (
-                      window.URL.createObjectURL(input.files[0])
-                    )
-                    upload(input.files[0]);
+                    let input = document.getElementById(input_image)
+                    ImageTools.resize(input.files[0], {
+                        width: 480, // maximum width
+                        height: 640 // maximum height
+                    }, function(blob, didItResize) {
+                        // didItResize will be true if it managed to resize it, otherwise false (and will return the original file as 'blob')
+                        document.getElementById('image-preview').src = window.URL.createObjectURL(blob);
+                        upload(blob);
+                    });
+                    // document.getElementById('image-preview').src = (
+                    //   window.URL.createObjectURL(input.files[0])
+                    // )
+                    // upload(input.files[0]);
                 };
 
                 function startCapture() {
-                    var video = document.getElementById('video')
+                    let video = document.getElementById('video')
                     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                         navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
                             video.srcObject = stream
@@ -125,14 +133,19 @@
                     }
                     document.getElementById("image-preview").style.display = "none"
                     video.style.display = "block"
+                    const $dataWrapper = document.getElementById('data-wrapper')
+                    $dataWrapper.innerHTML = '&nbsp;'
                 }
 
                 function capture() {
                     // const MAX_CAPTURES_LEN = 4
                     canvas = document.getElementById('canvas')
-                    var video = document.getElementById('video')
+                    let video = document.getElementById('video')
                     canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
-                    canvas.toBlob(function(blob) { upload(blob)}, 'image/jpg')
+                    let preview = document.getElementById("image-preview")
+                    canvas.toBlob(function(blob) { upload(blob); preview.src = window.URL.createObjectURL(blob)}, 'image/jpg')
+                    preview.style.display = 'block'
+                    stopCapture(video)
                 }
             </script>
         </main>
