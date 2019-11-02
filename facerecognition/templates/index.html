@@ -15,7 +15,7 @@
     >
     <script src="{{ url('static', filename='javascript/ImageTools.js') }}"></script>
 </head>
-<body>
+<body onload="onLoad()">
     <header class="header">
         <!--
         <a href="https://github.com/bheupers/recognizeme" class="fork-me-on-github">
@@ -51,12 +51,32 @@
                 </p>
             </div>
             <div class="image-block">
-                    <img id="image-preview" src="https://crowdsourcer.io/assets/images/no-img.png">
-                    <video ref="video" id="video" width="640" height="480" autoplay="false"></video>
-                <canvas ref="canvas" id="canvas" width="640" height="480"></canvas>
+                    <!-- <img id="image-preview" src="https://crowdsourcer.io/assets/images/no-img.png">-->
+                <video ref="video" id="video" width="640" height="480" autoplay="false" style="display:None; margin: 0 auto"></video>
+                <canvas ref="canvas" id="canvas" width="640" height="480" style="margin: 0 auto"></canvas>
             </div>
 
             <script type="text/javascript">
+                function onLoad() {
+                    let canvas = document.getElementById("canvas");
+                    var ctx = canvas.getContext("2d");
+                    var img = new Image;
+                        img.onload = function(){
+                            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+                        };
+                    img.src = "{{ url('static', filename='images/no-img.png') }}";
+                    canvas.style.display = "block";
+                }
+
+                function drawRectangle(canvas, top, bottom, right, left) {
+                    var ctx = canvas.getContext("2d");
+                    ctx.beginPath();
+                    ctx.rect(left, top, right - left, bottom - top);
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.stroke();
+                }
+
                 function stopCapture(video) {
                     let videoSrcObject = video.srcObject
                     if( videoSrcObject !== null) {
@@ -70,20 +90,27 @@
 
                   let names = Object.keys(data['recognitions'])
                   if (names.length > 0) {
+                      let canvas = document.getElementById("canvas");
+                      let first = true;
                       names.forEach(function(name, index) {
-                          outStr += name
+                          outStr += (first ? name : ', ' + name);
+                          first = false;
+                          r = data['recognitions'][name];
+                          drawRectangle(canvas, r.top, r.bottom, r.right, r.left);
                       })
                   }
                   if( outStr.length == 0) {
                       outStr = '&nbsp;'
                   }
+                  canvas.style.display = 'block'
                   return outStr
                 }
+
                 function HandleBrowseClick(input_image) {
                     video = document.getElementById('video')
                     stopCapture(video)
-                    let image_preview = document.getElementById("image-preview")
-                    image_preview.style.display = "block"
+                    let canvas = document.getElementById("canvas")
+                    canvas.style.display = "block"
                     let fileinput = document.getElementById(input_image);
                     fileinput.click();
                 };
@@ -108,17 +135,19 @@
                 function handleOnChange(input_image) {
                     let input = document.getElementById(input_image)
                     ImageTools.resize(input.files[0], {
-                        width: 480, // maximum width
-                        height: 640 // maximum height
+                        width: 640, // maximum width
+                        height: 480 // maximum height
                     }, function(blob, didItResize) {
                         // didItResize will be true if it managed to resize it, otherwise false (and will return the original file as 'blob')
-                        document.getElementById('image-preview').src = window.URL.createObjectURL(blob);
+                        canvas = document.getElementById('canvas')
+                        var ctx = canvas.getContext("2d");
+                        var img = new Image;
+                        img.onload = function(){
+                            ctx.drawImage(img,0,0);
+                        };
+                        img.src = window.URL.createObjectURL(blob);
                         upload(blob);
                     });
-                    // document.getElementById('image-preview').src = (
-                    //   window.URL.createObjectURL(input.files[0])
-                    // )
-                    // upload(input.files[0]);
                 };
 
                 function startCapture() {
@@ -131,7 +160,7 @@
                             console.log('Something went wrong:' + e.toString())
                         })
                     }
-                    document.getElementById("image-preview").style.display = "none"
+                    document.getElementById("canvas").style.display = "none"
                     video.style.display = "block"
                     const $dataWrapper = document.getElementById('data-wrapper')
                     $dataWrapper.innerHTML = '&nbsp;'
@@ -139,12 +168,11 @@
 
                 function capture() {
                     // const MAX_CAPTURES_LEN = 4
-                    canvas = document.getElementById('canvas')
+                    let canvas = document.getElementById('canvas')
                     let video = document.getElementById('video')
                     canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
-                    let preview = document.getElementById("image-preview")
-                    canvas.toBlob(function(blob) { upload(blob); preview.src = window.URL.createObjectURL(blob)}, 'image/jpg')
-                    preview.style.display = 'block'
+                    canvas.toBlob(function(blob) { upload(blob); }, 'image/jpg')
+                    canvas.style.display = 'block'
                     stopCapture(video)
                 }
             </script>
