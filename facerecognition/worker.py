@@ -5,7 +5,6 @@ import pickle
 from typing import Tuple, Dict, Any, Optional
 import numpy as np
 
-import face_recognition
 from PIL import Image
 
 
@@ -45,6 +44,9 @@ def prepare_image(image: Image) -> Image:
 
 
 def recognize(raw_data: bytes, encodings: Optional[Any] = None, detection_method: Optional[str] = None) -> bytes:
+    # face_recognition cannot be imported at the top because
+    # CUDA dependency can only be active in one process at the same
+    import face_recognition
     if encodings is None:
         encodings = _encodings
 

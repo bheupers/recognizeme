@@ -1,0 +1,10 @@
+aiohttp==3.6.2
+aiohttp-jinja2==1.2.0
+dataclasses==0.7
+dlib==19.18.99
+face-recognition==1.2.3
+face-recognition-models==0.3.0
+Jinja2==2.10.1
+numpy==1.16.4
+trafaret==2.0.0
+trafaret-config==2.0.2
