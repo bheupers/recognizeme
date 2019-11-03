@@ -56,15 +56,36 @@ main {
     width: 100%;
 }
 
+.name-info {
+    font-size: 24px;
+    margin-left: 20px;
+    margin-top: 20px;
+}
 
-.predict-info {
+.recognize-info {
+
     margin-left: 20px;
 }
 
-#video, #image-preview {
+#video {
     display: block;
     margin: 0 auto;
-/*    width: 100%; */
+
+}
+
+.button-snap-block {
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+input[type=text] {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border-color: #4cae4c;
 }
 
 /* github link */
@@ -110,6 +131,15 @@ main {
     background-color: #1eb846;
 }
 
+.btn-success:disabled {
+    background-color: #888888;
+    border-color: #686868;
+}
+
+.btn-large {
+    font-size: 18px;
+}
+
 .large-text {
     font-size: 50px;
 }
@@ -117,3 +147,4 @@ main {
 #canvas {
     display: none;
 }
+

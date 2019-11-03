@@ -21,21 +21,20 @@ class SiteHandler:
 
     async def recognize(self, request: web.Request) -> web.Response:
         form = await request.post()
-        raw_data = form['file'].file.read()
+        file_data = form['file'].file.read()
         executor = request.app['executor']
         r = self._loop.run_in_executor
-        raw_data = await r(executor, recognize, raw_data)
+        result_data = await r(executor, recognize, file_data)
         headers = {'Content-Type': 'application/json'}
-        return web.Response(body=raw_data, headers=headers)
-
+        return web.Response(body=result_data, headers=headers)
 
     async def add_face(self, request: web.Request) -> web.Response:
         form = await request.post()
         name = form['name']
-        raw_data = form['file'].file.read()
+        file_data = form['file'].file.read()
         executor = request.app['executor']
         r = self._loop.run_in_executor
-        raw_data = await r(executor, add_face, name, raw_data)
+        result_data = await r(executor, add_face, name, file_data)
         # raw_data = predict(raw_data)
         headers = {'Content-Type': 'application/json'}
-        return web.Response(body=raw_data, headers=headers)
+        return web.Response(body=result_data, headers=headers)

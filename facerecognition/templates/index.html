@@ -3,180 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta
-        name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
     >
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="icon" href="{{ url('static', filename='images/favicon.ico') }}">
     <title>RecognizeME</title>
     <link
-        rel="stylesheet"
-        href="{{ url('static', filename='styles/main.css') }}"
+            rel="stylesheet"
+            href="{{ url('static', filename='styles/main.css') }}"
     >
     <script src="{{ url('static', filename='javascript/ImageTools.js') }}"></script>
 </head>
 <body onload="onLoad()">
-    <header class="header">
-        <!--
-        <a href="https://github.com/bheupers/recognizeme" class="fork-me-on-github">
-            <img
-                src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
-                alt="Fork me on GitHub"
-            >
-        </a>
-        -->
-        <div class="banner">
-            <img
+<header class="header">
+    <!--
+    <a href="https://github.com/bheupers/recognizeme" class="fork-me-on-github">
+        <img
+            src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
+            alt="Fork me on GitHub"
+        >
+    </a>
+    -->
+    <div class="banner">
+        <img
                 class="banner-logo"
                 src="{{ url('static', filename='images/logo.png') }}"
                 alt="logo"
-            >
-            <h1 class="banner-title">RecognizeMe</h1>
+        >
+        <h1 class="banner-title">RecognizeMe</h1>
+        <p>
+            <b><i>dlib</i></b> face-recognition deployed with aiohttp
+        </p>
+    </div>
+</header>
+<div class="wrapper">
+    <main>
+        <button class="btn btn-success" onclick="HandleBrowseClick('input-image-hidden');">Upload image</button>
+        <button class="btn btn-success" id="start-capture" onclick="startCapture()">Start Video</button>
+        <button class="btn btn-success" id="toggle-add-face" onclick="toggleAddFace()">Add Face Mode</button>
+
+        <input style="display: none;" id="input-image-hidden" onchange="handleOnChange('input-image-hidden')"
+               type="file" accept="image/jpeg, image/png">
+        <br/>
+        <div class="name-info" id="name-info" style="display:none">
+            <label for="fname">Give new name </label>
+            <input disabled id="fname" type="text" name="fname" maxlength="32" size="32">
+        </div>
+
+        <div class="button-snap-block">
+            <button class="btn btn-success btn-large" id="snap" onclick="capture()" disabled>Who is this ?</button>
+        </div>
+
+        <div class="add-face-info" id="add-face-info" style="display:none">
             <p>
-                <b><i>dlib</i></b> face-recognition deployed with aiohttp
+                <span style="font-size: x-large; "><div class="large-text" id="result-add-face">&nbsp</div></span>
             </p>
         </div>
-    </header>
-    <div class="wrapper">
-        <main>
-            <button  class="btn btn-success" onclick="HandleBrowseClick('input-image-hidden');" >Upload image</button>
-            <button class="btn btn-success" id="start-capture" onclick="startCapture()">Start Video</button>
-            <button class="btn btn-success" id="snap" onclick="capture()">Recognize Video</button>
-            <input style="display: none;" id="input-image-hidden" onchange="handleOnChange('input-image-hidden')" type="file" accept="image/jpeg, image/png">
-            <br>
-            <div class="predict-info">
-                <p>
-                    <b>Who is this ?</b>
-                    <span style="font-size: x-large; "><div class="large-text" id="data-wrapper">&nbsp;</div></span>
-                </p>
-            </div>
-            <div class="image-block">
-                    <!-- <img id="image-preview" src="https://crowdsourcer.io/assets/images/no-img.png">-->
-                <video ref="video" id="video" width="640" height="480" autoplay="false" style="display:None; margin: 0 auto"></video>
-                <canvas ref="canvas" id="canvas" width="640" height="480" style="margin: 0 auto"></canvas>
-            </div>
 
-            <script type="text/javascript">
-                function onLoad() {
-                    let canvas = document.getElementById("canvas");
-                    var ctx = canvas.getContext("2d");
-                    var img = new Image;
-                        img.onload = function(){
-                            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
-                        };
-                    img.src = "{{ url('static', filename='images/no-img.png') }}";
-                    canvas.style.display = "block";
-                }
 
-                function drawRectangle(canvas, top, bottom, right, left) {
-                    var ctx = canvas.getContext("2d");
-                    ctx.beginPath();
-                    ctx.rect(left, top, right - left, bottom - top);
-                    ctx.lineWidth = 3;
-                    ctx.strokeStyle = '#ff0000';
-                    ctx.stroke();
-                }
+        <div class="recognize-info" id="recognize-info">
+            <span style="font-size: x-large; "><div class="large-text" id="result-recognize">&nbsp;</div></span>
+        </div>
+        <div class="image-block">
+            <!-- <img id="image-preview" src="https://crowdsourcer.io/assets/images/no-img.png">-->
+            <video ref="video" id="video" width="640" height="480" autoplay="false"
+                   style="display:None; margin: 0 auto"></video>
+            <canvas ref="canvas" id="canvas" width="640" height="480" style="margin: 0 auto"></canvas>
+        </div>
 
-                function stopCapture(video) {
-                    let videoSrcObject = video.srcObject
-                    if( videoSrcObject !== null) {
-                        videoSrcObject.getVideoTracks().forEach(track => track.stop())
-                    }
-                    video.style.display = "none"
-                }
-
-                function responseToHtml(data) {
-                  let outStr = '';
-
-                  let names = Object.keys(data['recognitions'])
-                  if (names.length > 0) {
-                      let canvas = document.getElementById("canvas");
-                      let first = true;
-                      names.forEach(function(name, index) {
-                          outStr += (first ? name : ', ' + name);
-                          first = false;
-                          r = data['recognitions'][name];
-                          drawRectangle(canvas, r.top, r.bottom, r.right, r.left);
-                      })
-                  }
-                  if( outStr.length == 0) {
-                      outStr = '&nbsp;'
-                  }
-                  canvas.style.display = 'block'
-                  return outStr
-                }
-
-                function HandleBrowseClick(input_image) {
-                    video = document.getElementById('video')
-                    stopCapture(video)
-                    let canvas = document.getElementById("canvas")
-                    canvas.style.display = "block"
-                    let fileinput = document.getElementById(input_image);
-                    fileinput.click();
+        <script type="text/javascript">
+            function onLoad() {
+                let canvas = document.getElementById("canvas");
+                var ctx = canvas.getContext("2d");
+                var img = new Image;
+                img.onload = function () {
+                    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
                 };
+                img.src = "{{ url('static', filename='images/no-img.png') }}";
+                canvas.style.display = "block";
+            }
 
-                const upload = (file) => {
-                  const data = new FormData();
-                  const $dataWrapper = document.getElementById('data-wrapper')
-                  $dataWrapper.innerHTML = '&nbsp;'
+            function drawRectangle(canvas, top, bottom, right, left) {
+                var ctx = canvas.getContext("2d");
+                ctx.beginPath();
+                ctx.rect(left, top, right - left, bottom - top);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ff0000';
+                ctx.stroke();
+            }
 
-                  data.append('file', file);
+            function stopCapture(video) {
+                const videoSrcObject = video.srcObject
+                if (videoSrcObject !== null) {
+                    videoSrcObject.getVideoTracks().forEach(track => track.stop())
+                }
+                video.style.display = "none"
+                document.getElementById("start-capture").disabled = false;
+                document.getElementById("snap").disabled = true;
+            }
 
-                  fetch('{{ url("recognize") }}', {
+            function responseRecognizeToHtml(data) {
+                let outStr = '';
+                const names = Object.keys(data['recognitions'])
+                if (names.length > 0) {
+                    const canvas = document.getElementById("canvas");
+                    let first = true;
+                    names.forEach(function (name, index) {
+                        outStr += (first ? name : ', ' + name);
+                        first = false;
+                        r = data['recognitions'][name];
+                        drawRectangle(canvas, r.top, r.bottom, r.right, r.left);
+                    })
+                } else {
+                    outStr = "No faces found";
+                }
+                canvas.style.display = 'block';
+                document.getElementById("add-face-info").style.display = 'none';
+                document.getElementById("recognize-info").style.display = 'block';
+                return outStr;
+            }
+
+            function responseAddFaceToHtml(data) {
+                let outStr = '';
+                const names = data['faces_added']
+                if (names.length > 0) {
+                    const canvas = document.getElementById("canvas");
+                    let first = true;
+                    names.forEach(function (name, index) {
+                        outStr += (first ? name : ', ' + name);
+                        first = false;
+                    })
+                } else {
+                    outStr = data['message']
+                    outStr = "No faces found";
+                }
+                canvas.style.display = 'block'
+                document.getElementById("add-face-info").style.display = 'block';
+                document.getElementById("recognize-info").style.display = 'none';
+                return outStr;
+            }
+
+            function HandleBrowseClick(input_image) {
+                video = document.getElementById('video')
+                stopCapture(video)
+                const canvas = document.getElementById("canvas")
+                canvas.style.display = "block"
+                const fileinput = document.getElementById(input_image);
+                fileinput.click();
+            };
+
+            const upload = (file) => {
+                const data = new FormData();
+                const resultRecognize = document.getElementById('result-recognize')
+                resultRecognize.innerHTML = '&nbsp;'
+
+                data.append('file', file);
+
+                fetch('{{ url("recognize") }}', {
                     method: 'POST',
                     body: data,
-                  }).then(
+                }).then(
                     response => response.json()
-                  ).then(
-                    data => $dataWrapper.innerHTML = responseToHtml(data)
-                  )
-                };
+                ).then(
+                    data => resultRecognize.innerHTML = responseRecognizeToHtml(data)
+                )
+            };
 
-                function handleOnChange(input_image) {
-                    let input = document.getElementById(input_image)
-                    ImageTools.resize(input.files[0], {
-                        width: 640, // maximum width
-                        height: 480 // maximum height
-                    }, function(blob, didItResize) {
-                        // didItResize will be true if it managed to resize it, otherwise false (and will return the original file as 'blob')
-                        canvas = document.getElementById('canvas')
-                        var ctx = canvas.getContext("2d");
-                        var img = new Image;
-                        img.onload = function(){
-                            ctx.drawImage(img,0,0);
-                        };
-                        img.src = window.URL.createObjectURL(blob);
-                        upload(blob);
-                    });
-                };
+            const add_face = (name, file) => {
+                const data = new FormData();
+                const resultAddFace = document.getElementById('result-add-face')
+                resultAddFace.innerHTML = '&nbsp;'
 
-                function startCapture() {
-                    let video = document.getElementById('video')
-                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-                            video.srcObject = stream
-                            video.play()
-                        }).catch(function (e) {
-                            console.log('Something went wrong:' + e.toString())
-                        })
+                data.append('name', name)
+                data.append('file', file);
+
+                fetch('{{ url("add_face") }}', {
+                    method: 'POST',
+                    body: data,
+                }).then(
+                    response => response.json()
+                ).then(
+                    data => resultAddFace.innerHTML = responseAddFaceToHtml(data)
+                )
+            };
+
+            function handleOnChange(input_image) {
+                const input = document.getElementById(input_image)
+                ImageTools.resize(input.files[0], {
+                    width: 640, // maximum width
+                    height: 480 // maximum height
+                }, function (blob, didItResize) {
+                    // didItResize will be true if it managed to resize it, otherwise false (and will return the original file as 'blob')
+                    canvas = document.getElementById('canvas')
+                    var ctx = canvas.getContext("2d");
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    var img = new Image;
+                    img.onload = function () {
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = window.URL.createObjectURL(blob);
+                    document.getElementById("snap").disabled = false;
+                    // upload(blob);
+                });
+            };
+
+            function startCapture() {
+                const video = document.getElementById('video')
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
+                        video.srcObject = stream
+                        video.play()
+                    }).catch(function (e) {
+                        console.log('Something went wrong:' + e.toString())
+                    })
+                }
+                document.getElementById("canvas").style.display = "none"
+                video.style.display = "block"
+                const resultRecognize = document.getElementById('result-recognize')
+                resultRecognize.innerHTML = '&nbsp;'
+                document.getElementById("start-capture").disabled = true;
+                document.getElementById("snap").disabled = false;
+            }
+
+            function capture() {
+                let addFaceMode = false;
+                let newName = '';
+                if( document.getElementById('name-info').style.display == 'block' ) {
+                    addFaceMode = true
+                    newName = document.getElementById("fname").value;
+                    if (! newName) {
+                        alert("New name cannot be empty");
+                        document.getElementById("fname").setFocus();
+                        return;
                     }
-                    document.getElementById("canvas").style.display = "none"
-                    video.style.display = "block"
-                    const $dataWrapper = document.getElementById('data-wrapper')
-                    $dataWrapper.innerHTML = '&nbsp;'
                 }
-
-                function capture() {
-                    // const MAX_CAPTURES_LEN = 4
-                    let canvas = document.getElementById('canvas')
+                const canvas = document.getElementById('canvas')
+                if( video.style.display == 'block') {
                     let video = document.getElementById('video')
-                    canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
-                    canvas.toBlob(function(blob) { upload(blob); }, 'image/jpg')
-                    canvas.style.display = 'block'
-                    stopCapture(video)
+                    var ctx = canvas.getContext("2d");
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    canvas.getContext('2d').drawImage(video, 0, 0);
                 }
-            </script>
-        </main>
-    </div>
+                canvas.toBlob(function (blob) {
+                    if (addFaceMode) {
+                        add_face(newName, blob);
+                    } else {
+                        upload(blob);
+                    }
+                }, 'image/jpg')
+                canvas.style.display = 'block'
+                stopCapture(video)
+            }
+
+            function toggleAddFace() {
+                const toggleAddFace = document.getElementById("toggle-add-face")
+                const divNameInfo = document.getElementById("name-info");
+                const inputFName = document.getElementById("fname");
+                const btnSnap = document.getElementById("snap");
+                if (divNameInfo.style.display == "block") {
+                    divNameInfo.style.display = "none";
+                    inputFName.disabled = true;
+                    toggleAddFace.innerText = "Add Face Mode";
+                    btnSnap.innerText = "Who is this ?"
+                } else {
+                    divNameInfo.style.display = "block";
+                    inputFName.disabled = false;
+                    toggleAddFace.innerText = "Recognize Mode";
+                    btnSnap.innerText = "Add Face"
+                }
+            }
+        </script>
+    </main>
+</div>
 </body>
 </html>
