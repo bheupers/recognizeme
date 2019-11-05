@@ -139,4 +139,4 @@ About
 # local
 dlib-19.18/
 data/
-.DS_Store
+**/.DS_Store
