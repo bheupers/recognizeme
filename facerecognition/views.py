@@ -35,6 +35,5 @@ class SiteHandler:
         executor = request.app['executor']
         r = self._loop.run_in_executor
         result_data = await r(executor, add_face, name, file_data)
-        # raw_data = predict(raw_data)
         headers = {'Content-Type': 'application/json'}
         return web.Response(body=result_data, headers=headers)

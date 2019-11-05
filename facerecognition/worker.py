@@ -8,13 +8,13 @@ import random
 
 from PIL import Image
 
-
 _encodings = None
 _detection_method = None
 _encodings_path = None
-_encodings_length = None
+_encodings_length = 0
 
 MAX_EXTRA_ENCODINGS = 16
+
 
 def warm(encodings_path: str, detection_method: str) -> None:
     # should be executed only in child processes
@@ -73,7 +73,7 @@ def recognize(file_data: bytes, encodings: Optional[Any] = None, detection_metho
     image = prepare_image(image)
 
     # print("[INFO] recognizing faces...")
-    boxes = face_recognition.face_locations(image,model=detection_method)
+    boxes = face_recognition.face_locations(image, model=detection_method)
     # start = elapsed("face_locations", start)
     received_encodings = face_recognition.face_encodings(image, boxes)
     # start = elapsed("face_encodings", start)
@@ -112,7 +112,7 @@ def recognize(file_data: bytes, encodings: Optional[Any] = None, detection_metho
 
     recognitions = {}
     for ((top, right, bottom, left), name) in zip(boxes, names):
-        recognitions[name] = { 'top': top, 'bottom': bottom, 'right': right, 'left': left}
+        recognitions[name] = {'top': top, 'bottom': bottom, 'right': right, 'left': left}
     data['recognitions'] = recognitions
     data['success'] = True
     return json.dumps(data).encode('utf-8')
@@ -156,7 +156,7 @@ def add_face(name: str, file_data: bytes, encodings: Optional[Any] = None,
         # f = open(_encodings_path, "wb")
         # f.write(pickle.dumps(data))
         # f.close()
-        data['faces_added'] = [name.lower()]
+        data['faces_added'] = [name.title()]
         data['message'] = 'one face added'
         data['success'] = True
     else:
