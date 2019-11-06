@@ -131,6 +131,10 @@ input[type=text] {
     background-color: #1eb846;
 }
 
+#toggle-help-button {
+    float: right;
+}
+
 .btn-success:disabled {
     background-color: #888888;
     border-color: #686868;

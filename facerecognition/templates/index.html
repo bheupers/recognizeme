@@ -39,14 +39,17 @@
 </header>
 <main>
     <div class="wrapper">
-        <p>
-            First add a face by enabling <b>Add Face Mode</b>, give a name and add a picture of a face by either
-            <b>Upload Image</b> or <b>Start Camera</b>. Then press "Add Face".
-        </p>
-        <p>
-            Then use <b>Recognize Mode</b> and supply a new picture with upload or the camera and press <b>Who is
-            this?</b>
-        </p>
+        <button id="toggle-help-button" onclick="toggleHelpText()">X</button>
+        <div id="help-text">
+            <p>
+                First add a face by enabling <b>Add Face Mode</b>, give a name and add a picture of a face by either
+                <b>Upload Image</b> or <b>Start Camera</b>. Then press "Add Face".
+            </p>
+            <p>
+                Then use <b>Recognize Mode</b> and supply a new picture with upload or the camera and press <b>Who is
+                this?</b>
+            </p>
+        </div>
         <button class="btn btn-success" onclick="HandleBrowseClick('input-image-hidden');">Upload Image</button>
         <button class="btn btn-success" id="start-capture" onclick="startCapture()">Start Camera</button>
         <button class="btn btn-success" id="toggle-add-face" onclick="toggleAddFace()">Add Face Mode</button>
@@ -56,7 +59,7 @@
         <br/>
         <div class="name-info" id="name-info" style="display:none">
             <label for="fname">Give new name </label>
-            <input disabled id="fname" type="text" name="fname" maxlength="32" size="32">
+            <input disabled id="fname" type="text" name="fname" maxlength="32" size="16">
         </div>
 
         <div class="button-snap-block">
@@ -261,7 +264,7 @@
         function capture() {
             let addFaceMode = false;
             let newName = '';
-            if (document.getElementById('name-info').style.display == 'block') {
+            if (document.getElementById('name-info').style.display === 'block') {
                 addFaceMode = true;
                 newName = document.getElementById("fname").value;
                 if (!newName) {
@@ -271,7 +274,7 @@
                 }
             }
             const canvas = document.getElementById('canvas');
-            if (video.style.display == 'block') {
+            if (video.style.display === 'block') {
                 let video = document.getElementById('video');
                 var ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -296,7 +299,7 @@
             const addFaceInfo = document.getElementById("add-face-info");
             const recognizeInfo = document.getElementById("recognize-info");
 
-            if (divNameInfo.style.display == "block") {
+            if (divNameInfo.style.display === "block") {
                 divNameInfo.style.display = "none";
                 inputFName.disabled = true;
                 toggleAddFace.innerText = "Add Face Mode";
@@ -310,6 +313,18 @@
                 btnSnap.innerText = "Add Face";
                 recognizeInfo.style.display = 'none';
                 addFaceInfo.style.display = 'block';
+            }
+        }
+
+        function toggleHelpText(){
+            helpText = document.getElementById("help-text");
+            buttonHelpText = document.getElementById("toggle-help-button");
+            if( helpText.style.display !== 'none') {
+                helpText.style.display = 'none';
+                buttonHelpText.innerHTML = "?";
+            } else {
+                helpText.style.display = 'block';
+                buttonHelpText.innerHTML = "x";
             }
         }
     </script>
