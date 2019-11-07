@@ -32,7 +32,7 @@ For the image handling some Javascript was required to deal with the HTML5 canva
 
 To install this we first need to install DLIB. Follow instructions for installing this on for example https://www.pyimagesearch.com/2017/03/27/how-to-install-dlib/
   
-Then  do the follwing :
+Then do :
 
 ```
 git clone https://github.com/bheupers/recognizeme.git

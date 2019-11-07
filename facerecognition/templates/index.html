@@ -100,11 +100,11 @@
             let w = screen.width;
             if (w < 640) {
                 vWidth = w;
-                vHeight = (480 * w / 640).toFixed(0);
+                vHeight = Math.trunc(480 * w / 640);
             }
             canvas.width = vWidth;
             canvas.height = vHeight;
-            video.width = vWidth
+            video.width = vWidth;
             video.height = vHeight;
             let ctx = canvas.getContext("2d");
             let img = new Image;
@@ -275,10 +275,27 @@
             }
             const canvas = document.getElementById('canvas');
             if (video.style.display === 'block') {
-                let video = document.getElementById('video');
-                var ctx = canvas.getContext("2d");
+                const video = document.getElementById('video');
+                const ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                canvas.getContext('2d').drawImage(video, 0, 0, vWidth, vHeight);
+                let w = video.videoWidth;
+                let h = video.videoHeight;
+                let x = 0;
+                let y = 0;
+                let w1 = Math.trunc(w * vHeight / h);
+                let h1 = Math.trunc(h * vWidth / w);
+                //let h1 =
+                if(w1 < vWidth) {
+                    h1 = vHeight;
+                    x = (vWidth - w1) / 2;
+                } else if( h1 < vHeight) {
+                    w1 = vWidth;
+                    y = (vHeight - h1) / 2;
+                } else {
+                    w1 = vWidth;
+                    h1 = vHeight;
+                }
+                canvas.getContext('2d').drawImage(video, x, y, w1, h1);
             }
             canvas.toBlob(function (blob) {
                 if (addFaceMode) {
