@@ -48,8 +48,3 @@ python -m face_recognition
 
 
 and test on : http://localhost:8000/recognizeme/
-
-# TODO
-
-* Videosize on mobile devices
-* Add forkme on github
