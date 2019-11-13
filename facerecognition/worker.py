@@ -1,5 +1,7 @@
 import io
 import json
+import logging
+import os
 import signal
 import pickle
 from typing import Tuple, Dict, Any, Optional
@@ -15,6 +17,7 @@ _encodings_length = 0
 
 MAX_EXTRA_ENCODINGS = 16
 
+_logger = logging.getLogger(__name__)
 
 def warm(encodings_path: str, detection_method: str) -> None:
     # should be executed only in child processes
@@ -25,8 +28,15 @@ def warm(encodings_path: str, detection_method: str) -> None:
     global _encodings_length
     global _encodings
     if _encodings is None:
-        _encodings = pickle.loads(open(encodings_path, "rb").read())
+        if os.path.isfile(encodings_path):
+            _encodings = pickle.loads(open(encodings_path, "rb").read())
+        else:
+            _encodings = {
+                'encodings': [],
+                'names':[]
+            }
         _encodings_length = len(_encodings['encodings'])
+
     global _detection_method
     if _detection_method is None:
         _detection_method = detection_method
@@ -115,6 +125,7 @@ def recognize(file_data: bytes, encodings: Optional[Any] = None, detection_metho
         recognitions[name] = {'top': top, 'bottom': bottom, 'right': right, 'left': left}
     data['recognitions'] = recognitions
     data['success'] = True
+    _logger.warning("Recognized : %s", names)
     return json.dumps(data).encode('utf-8')
 
 
@@ -163,4 +174,5 @@ def add_face(name: str, file_data: bytes, encodings: Optional[Any] = None,
         data['faces_added'] = []
         data['message'] = 'no faces found in image' if len(boxes) == 0 else 'more then one face found'
         data['success'] = False
+    _logger.warning("Add face result : %s, (%s)", data['message'] , str(data['faces_added']))
     return json.dumps(data).encode('utf-8')

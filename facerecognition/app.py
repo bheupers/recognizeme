@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,7 @@ def init_jinja2(app: web.Application) -> None:
 
 async def init_app(conf: Config) -> web.Application:
     app = web.Application()
+    logging.basicConfig(level=logging.WARNING)
     executor = await init_workers(app, conf.workers)
     init_config(app, conf)
     init_jinja2(app)
@@ -32,6 +34,7 @@ async def init_app(conf: Config) -> web.Application:
 
 
 def main(args: Any = None) -> None:
+
     conf = get_config(args)
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(init_app(conf))
