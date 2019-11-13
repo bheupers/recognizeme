@@ -24,7 +24,7 @@ def init_jinja2(app: web.Application) -> None:
 
 async def init_app(conf: Config) -> web.Application:
     app = web.Application()
-    logging.basicConfig(level=logging.WARNING)
+    logging.basicConfig(level=logging.INFO)
     executor = await init_workers(app, conf.workers)
     init_config(app, conf)
     init_jinja2(app)
@@ -38,4 +38,4 @@ def main(args: Any = None) -> None:
     conf = get_config(args)
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(init_app(conf))
-    web.run_app(app, host=conf.app.host, port=conf.app.port)
+    web.run_app(app, host=conf.app.host, port=conf.app.port, access_log=None)

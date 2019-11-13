@@ -1,3 +1,4 @@
+import datetime
 import io
 import json
 import logging
@@ -125,7 +126,7 @@ def recognize(file_data: bytes, encodings: Optional[Any] = None, detection_metho
         recognitions[name] = {'top': top, 'bottom': bottom, 'right': right, 'left': left}
     data['recognitions'] = recognitions
     data['success'] = True
-    _logger.warning("Recognized : %s", names)
+    _logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S} Recognized : {names}")
     return json.dumps(data).encode('utf-8')
 
 
@@ -174,5 +175,5 @@ def add_face(name: str, file_data: bytes, encodings: Optional[Any] = None,
         data['faces_added'] = []
         data['message'] = 'no faces found in image' if len(boxes) == 0 else 'more then one face found'
         data['success'] = False
-    _logger.warning("Add face result : %s, (%s)", data['message'] , str(data['faces_added']))
+    _logger.info(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S} Add face: {data['message']}, ({str(data['faces_added'])})")
     return json.dumps(data).encode('utf-8')
