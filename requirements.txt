@@ -1,4 +1,4 @@
-aiohttp==3.6.2
+aiohttp==3.7.4
 aiohttp-jinja2==1.2.0
 dataclasses==0.7
 dlib==19.18.99
