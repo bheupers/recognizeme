@@ -13,7 +13,6 @@ class SiteHandler:
     def __init__(self, conf: Config, executor: ProcessPoolExecutor) -> None:
         self._conf = conf
         self._executor = executor
-        self._loop = asyncio.get_event_loop()
 
     @aiohttp_jinja2.template('index.html')
     async def index(self, request: web.Request) -> Dict[str, str]:
@@ -22,8 +21,9 @@ class SiteHandler:
     async def recognize(self, request: web.Request) -> web.Response:
         form = await request.post()
         file_data = form['file'].file.read()
+        form["file"].file.close()  # Not needed in aiohttp 4+.
         executor = request.app['executor']
-        r = self._loop.run_in_executor
+        r = asyncio.get_event_loop().run_in_executor
         result_data = await r(executor, recognize, file_data)
         headers = {'Content-Type': 'application/json'}
         return web.Response(body=result_data, headers=headers)
@@ -33,7 +33,7 @@ class SiteHandler:
         name = form['name']
         file_data = form['file'].file.read()
         executor = request.app['executor']
-        r = self._loop.run_in_executor
+        r = asyncio.get_event_loop().run_in_executor
         result_data = await r(executor, add_face, name, file_data)
         headers = {'Content-Type': 'application/json'}
         return web.Response(body=result_data, headers=headers)
