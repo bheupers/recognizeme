@@ -48,3 +48,31 @@ python -m face_recognition
 
 
 and test on : http://localhost:8000/recognizeme/
+
+# Autostart
+
+Use systemd :
+
+```
+/etc/systemd/system/recognizeme.service
+```
+
+```
+[Unit]
+Description=Recognizeme service
+
+[Service]
+User=bart
+WorkingDirectory=/home/bart/sites/recognizeme
+ExecStart=/home/bart/sites/recognizeme/start.sh
+StandardOutput=file:/var/log/recognizeme.log
+StandardError=file:/var/log/recognizeme.err
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```
+sudo systemctl start|stop|status|restart recognizeme
+```
