@@ -88,13 +88,13 @@ async def init_workers(
     fs = [run(executor, warm, path, detection_method) for i in range(0, n)]
     await asyncio.gather(*fs)
 
-    async def close_executor(app: web.Application) -> None:
-        loop1 = asyncio.get_event_loop()
-        run1 = loop1.run_in_executor
-        fs1 = [run1(executor, clean) for i in range(0, n)]
-        await asyncio.shield(asyncio.gather(*fs1))
-        executor.shutdown(wait=True)
-
-    app.on_cleanup.append(close_executor)
+    # async def close_executor(app: web.Application) -> None:
+    #     loop1 = asyncio.get_event_loop()
+    #     run1 = loop1.run_in_executor
+    #     fs1 = [run1(executor, clean) for i in range(0, n)]
+    #     await asyncio.shield(asyncio.gather(*fs1))
+    #     executor.shutdown(wait=True)
+    #
+    # app.on_cleanup.append(close_executor)
     app['executor'] = executor
     return executor
