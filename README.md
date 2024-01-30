@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 Finally we can run the program  with :
 
-python -m face_recognition
+python -m facerecognition
 
 
 and test on : http://localhost:8000/recognizeme/
